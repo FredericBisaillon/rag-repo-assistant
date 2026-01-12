@@ -17,15 +17,32 @@ importers:
 
   apps/api:
     devDependencies:
+      '@rag/core':
+        specifier: workspace:*
+        version: link:../../packages/core
       '@types/node':
         specifier: ^25.0.6
         version: 25.0.6
 
-  packages/evals: {}
+  packages/core: {}
 
-  packages/ingestion: {}
+  packages/evals:
+    dependencies:
+      '@rag/core':
+        specifier: workspace:*
+        version: link:../core
 
-  packages/vectorstore: {}
+  packages/ingestion:
+    dependencies:
+      '@rag/core':
+        specifier: workspace:*
+        version: link:../core
+
+  packages/vectorstore:
+    dependencies:
+      '@rag/core':
+        specifier: workspace:*
+        version: link:../core
 
 packages:
 
