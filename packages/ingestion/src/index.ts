@@ -1,3 +1,2 @@
-export function ingestionHello(): string {
-  return "ingestion ready";
-}
+export { ingestRepo } from "./ingestRepo.js";
+
