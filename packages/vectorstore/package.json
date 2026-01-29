@@ -8,6 +8,11 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-  "@rag/core": "workspace:*"
-}
+    "@rag/core": "workspace:*",
+    "better-sqlite3": "^12.6.2"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^25.1.0"
+  }
 }

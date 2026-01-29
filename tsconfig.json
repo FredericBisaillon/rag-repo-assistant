@@ -1,0 +1,11 @@
+{
+  "files": [],
+  "references": [
+    { "path": "./packages/core" },
+    { "path": "./packages/ingestion" },
+    { "path": "./packages/vectorstore" },
+    { "path": "./packages/evals" },
+    { "path": "./apps/api" },
+    { "path": "./scripts" }
+  ]
+}
