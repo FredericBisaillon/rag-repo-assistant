@@ -2,6 +2,7 @@
   "files": [],
   "references": [
     { "path": "./packages/core" },
+    { "path": "./packages/embeddings" },
     { "path": "./packages/ingestion" },
     { "path": "./packages/vectorstore" },
     { "path": "./packages/evals" },

@@ -8,6 +8,12 @@ importers:
 
   .:
     dependencies:
+      '@rag/core':
+        specifier: workspace:*
+        version: link:packages/core
+      '@rag/embeddings':
+        specifier: workspace:*
+        version: link:packages/embeddings
       '@rag/ingestion':
         specifier: workspace:*
         version: link:packages/ingestion
@@ -35,6 +41,12 @@ importers:
         version: 25.1.0
 
   packages/core: {}
+
+  packages/embeddings:
+    devDependencies:
+      '@types/node':
+        specifier: ^25.1.0
+        version: 25.1.0
 
   packages/evals:
     dependencies:
