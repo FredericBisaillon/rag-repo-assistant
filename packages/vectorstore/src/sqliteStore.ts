@@ -9,12 +9,22 @@ import type {
 } from "@rag/core";
 import type { VectorStore, VectorStoreFilter } from "./store.js";
 
+export type RetrievedChunkWithVector = RetrievedChunk & { vector: number[] };
+
 type SqlRow = {
   chunk_id: string;
   text: string;
   metadata_json: string;
   vector_json: string;
 };
+
+function normalizePath(p: string): string {
+  // make routing/filtering stable across "./", "\" etc.
+  let s = p.replaceAll("\\", "/");
+  if (s.startsWith("./")) s = s.slice(2);
+  if (s.startsWith("/")) s = s.slice(1);
+  return s;
+}
 
 export class SqliteStore implements VectorStore {
   private db: Database.Database;
@@ -76,7 +86,8 @@ export class SqliteStore implements VectorStore {
     queryVector: number[];
     topK: number;
     filter?: VectorStoreFilter;
-  }): RetrievedChunk[] {
+    includeVectors?: boolean;
+  }): RetrievedChunk[] | RetrievedChunkWithVector[] {
     if (params.collections.length === 0) return [];
     if (params.topK <= 0) return [];
 
@@ -93,7 +104,11 @@ export class SqliteStore implements VectorStore {
       .all(...params.collections) as SqlRow[];
 
     const filter = params.filter ?? {};
-    const scored: RetrievedChunk[] = [];
+    const scored: Array<RetrievedChunk | RetrievedChunkWithVector> = [];
+
+    const prefixNorm = filter.sourcePathPrefix
+      ? normalizePath(filter.sourcePathPrefix)
+      : null;
 
     for (const row of rows) {
       const metadata = JSON.parse(row.metadata_json) as ChunkMetadata;
@@ -102,25 +117,32 @@ export class SqliteStore implements VectorStore {
         if (!filter.allowedSourceTypes.includes(metadata.sourceType)) continue;
       }
 
-      if (filter.sourcePathPrefix) {
-        if (!metadata.sourcePath.startsWith(filter.sourcePathPrefix)) continue;
+      if (prefixNorm) {
+        const srcNorm = normalizePath(metadata.sourcePath);
+        if (!srcNorm.startsWith(prefixNorm)) continue;
       }
 
       const vector = JSON.parse(row.vector_json) as number[];
       const similarity = cosineSimilarity(params.queryVector, vector);
 
-      scored.push({
+      const base: RetrievedChunk = {
         chunk: {
           id: row.chunk_id,
           text: row.text,
           metadata,
         },
         similarity,
-      });
+      };
+
+      if (params.includeVectors) {
+        scored.push({ ...base, vector });
+      } else {
+        scored.push(base);
+      }
     }
 
     scored.sort((a, b) => b.similarity - a.similarity);
-    return scored.slice(0, params.topK);
+    return scored.slice(0, params.topK) as any;
   }
 
   close(): void {
